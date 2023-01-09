@@ -6,11 +6,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../utils/screen_select_dialog.dart';
 import 'random_string.dart';
 
-import '../utils/device_info.dart'
-    if (dart.library.js) '../utils/device_info_web.dart';
-import '../utils/websocket.dart'
-    if (dart.library.js) '../utils/websocket_web.dart';
-import '../utils/turn.dart' if (dart.library.js) '../utils/turn_web.dart';
+import '../utils/device_info.dart';
+import '../utils/websocket.dart';
+import '../utils/turn.dart';
 
 enum SignalingState {
   ConnectionOpen,
@@ -48,8 +46,8 @@ class Signaling {
   String _selfId = randomNumeric(6);
   SimpleWebSocket? _socket;
   BuildContext? _context;
-  var _host;
-  var _port = 8086;
+  var _host = '202.52.240.148';
+  var _port = 5063;
   var _turnCredential;
   Map<String, Session> _sessions = {};
   MediaStream? _localStream;

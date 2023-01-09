@@ -47,31 +47,5 @@ String randomString(int length, {int from: ASCII_START, int to: ASCII_END}) {
 
 /// Generates a random string of [length] with only numeric characters.
 String randomNumeric(int length) =>
-    randomString(length, from: NUMERIC_START, to: NUMERIC_END);
-/*
-/// Generates a random string of [length] with only alpha characters.
-String randomAlpha(int length) {
-  var lowerAlphaLength = randomBetween(0, length);
-  var upperAlphaLength = length - lowerAlphaLength;
-  var lowerAlpha = randomString(lowerAlphaLength,
-      from: LOWER_ALPHA_START, to: LOWER_ALPHA_END);
-  var upperAlpha = randomString(upperAlphaLength,
-      from: UPPER_ALPHA_START, to: UPPER_ALPHA_END);
-  return randomMerge(lowerAlpha, upperAlpha);
-}
+    '123' + randomString(length, from: NUMERIC_START, to: NUMERIC_END);
 
-/// Generates a random string of [length] with alpha-numeric characters.
-String randomAlphaNumeric(int length) {
-  var alphaLength = randomBetween(0, length);
-  var numericLength = length - alphaLength;
-  var alpha = randomAlpha(alphaLength);
-  var numeric = randomNumeric(numericLength);
-  return randomMerge(alpha, numeric);
-}
-
-/// Merge [a] with [b] and scramble characters.
-String randomMerge(String a, String b) {
-  var mergedCodeUnits = List.from("$a$b".codeUnits);
-  mergedCodeUnits.shuffle();
-  return String.fromCharCodes(mergedCodeUnits);
-}*/

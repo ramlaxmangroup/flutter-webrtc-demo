@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "776892305488",
+    "project_id": "flutter-webrtc-demo-633d3",
+    "storage_bucket": "flutter-webrtc-demo-633d3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:776892305488:android:4f33a17273f2c2f4ce8155",
+        "android_client_info": {
+          "package_name": "com.cloudwebrtc.flutterwebrtcdemo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "776892305488-nft4cklmu8svc6ljlkec88kgh5nsuqea.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOuVZRAh8vxqymJxZPcecyJEbqEw8Xqnk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "776892305488-nft4cklmu8svc6ljlkec88kgh5nsuqea.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,19 +1,23 @@
-import 'package:flutter/material.dart';
 import 'dart:core';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../widgets/screen_select_dialog.dart';
 import 'signaling.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 
-class CallSample extends StatefulWidget {
+class CallP2P extends StatefulWidget {
   static String tag = 'call_sample';
   final String host;
-  CallSample({required this.host});
+  CallP2P({required this.host});
 
   @override
-  _CallSampleState createState() => _CallSampleState();
+  _CallP2PState createState() => _CallP2PState();
 }
 
-class _CallSampleState extends State<CallSample> {
+class _CallP2PState extends State<CallP2P> {
+  late SharedPreferences _prefs;
   Signaling? _signaling;
   List<dynamic> _peers = [];
   String? _selfId;
@@ -25,13 +29,20 @@ class _CallSampleState extends State<CallSample> {
   bool _waitAccept = false;
 
   // ignore: unused_element
-  _CallSampleState();
+  _CallP2PState();
 
   @override
   initState() {
     super.initState();
+    _initData();
     initRenderers();
     _connect(context);
+  }
+
+  _initData() async {
+    _prefs = await SharedPreferences.getInstance();
+    String _server = '202.52.240.148';
+    _prefs.setString('server', _server);
   }
 
   initRenderers() async {
@@ -134,19 +145,19 @@ class _CallSampleState extends State<CallSample> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("title"),
+          title: Text("Someone is Video Calling You:"),
           content: Text("accept?"),
           actions: <Widget>[
             MaterialButton(
               child: Text(
-                'Reject',
+                'Reject Call',
                 style: TextStyle(color: Colors.red),
               ),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             MaterialButton(
               child: Text(
-                'Accept',
+                'Accept Call',
                 style: TextStyle(color: Colors.green),
               ),
               onPressed: () => Navigator.of(context).pop(true),
@@ -162,8 +173,8 @@ class _CallSampleState extends State<CallSample> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("title"),
-          content: Text("waiting"),
+          title: Text("Video calling now..."),
+          content: Text("calling..."),
           actions: <Widget>[
             TextButton(
               child: Text("cancel"),
@@ -249,9 +260,7 @@ class _CallSampleState extends State<CallSample> {
     var self = (peer['id'] == _selfId);
     return ListBody(children: <Widget>[
       ListTile(
-        title: Text(self
-            ? peer['name'] + ', ID: ${peer['id']} ' + ' [Your self]'
-            : peer['name'] + ', ID: ${peer['id']} '),
+        title: Text(self ? peer['name'] + ', ID: ${peer['id']} ' + ' [Your self]' : peer['name'] + ', ID: ${peer['id']} '),
         onTap: null,
         trailing: SizedBox(
             width: 100.0,
@@ -259,16 +268,10 @@ class _CallSampleState extends State<CallSample> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   IconButton(
-                    icon: Icon(self ? Icons.close : Icons.videocam,
+                    icon: Icon(self ? null : Icons.videocam,
                         color: self ? Colors.grey : Colors.black),
                     onPressed: () => _invitePeer(context, peer['id'], false),
                     tooltip: 'Video calling',
-                  ),
-                  IconButton(
-                    icon: Icon(self ? Icons.close : Icons.screen_share,
-                        color: self ? Colors.grey : Colors.black),
-                    onPressed: () => _invitePeer(context, peer['id'], true),
-                    tooltip: 'Screen sharing',
                   )
                 ])),
         subtitle: Text('[' + peer['user_agent'] + ']'),
@@ -281,15 +284,8 @@ class _CallSampleState extends State<CallSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('P2P Call Sample' +
+        title: Text('WebRTC P2P Call' +
             (_selfId != null ? ' [Your ID ($_selfId)] ' : '')),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: null,
-            tooltip: 'setup',
-          ),
-        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: _inCalling
@@ -304,20 +300,15 @@ class _CallSampleState extends State<CallSample> {
                       onPressed: _switchCamera,
                     ),
                     FloatingActionButton(
-                      child: const Icon(Icons.desktop_mac),
-                      tooltip: 'Screen Sharing',
-                      onPressed: () => selectScreenSourceDialog(context),
+                      child: const Icon(Icons.mic_off),
+                      tooltip: 'Mute Mic',
+                      onPressed: _muteMic,
                     ),
                     FloatingActionButton(
                       onPressed: _hangUp,
                       tooltip: 'Hangup',
                       child: Icon(Icons.call_end),
                       backgroundColor: Colors.pink,
-                    ),
-                    FloatingActionButton(
-                      child: const Icon(Icons.mic_off),
-                      tooltip: 'Mute Mic',
-                      onPressed: _muteMic,
                     )
                   ]))
           : null,
