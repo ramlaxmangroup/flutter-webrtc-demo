@@ -1,14 +1,10 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-
-import '../utils/screen_select_dialog.dart';
-import 'random_string.dart';
-
-import '../utils/device_info.dart';
-import '../utils/websocket.dart';
-import '../utils/turn.dart';
+import 'dart:io';
+import 'websocket.dart';
 
 enum SignalingState {
   ConnectionOpen,
@@ -43,11 +39,11 @@ class Signaling {
 
   JsonEncoder _encoder = JsonEncoder();
   JsonDecoder _decoder = JsonDecoder();
-  String _selfId = randomNumeric(6);
+  String _selfId =  '123456';
   SimpleWebSocket? _socket;
   BuildContext? _context;
-  var _host = '202.52.240.148';
-  var _port = 5063;
+  var _host = '202.52.240.148'; // 'demo.cloudwebrtc.com
+  var _port = 5064; // 8086
   var _turnCredential;
   Map<String, Session> _sessions = {};
   MediaStream? _localStream;
@@ -80,6 +76,12 @@ class Signaling {
       */
     ]
   };
+
+  String getRandomId<T>(List<String> list) {
+    final random = new Random();
+    var i = random.nextInt(list.length);
+    return list[i];
+  }
 
   final Map<String, dynamic> _config = {
     'mandatory': {},
@@ -312,9 +314,9 @@ class Signaling {
       print('onOpen');
       onSignalingStateChange?.call(SignalingState.ConnectionOpen);
       _send('new', {
-        'name': DeviceInfo.label,
+        'name': "DeviceInfo.label",
         'id': _selfId,
-        'user_agent': DeviceInfo.userAgent
+        'user_agent': "DeviceInfo.userAgent"
       });
     };
 
@@ -350,22 +352,7 @@ class Signaling {
     };
     late MediaStream stream;
     if (userScreen) {
-      if (WebRTC.platformIsDesktop) {
-        final source = await showDialog<DesktopCapturerSource>(
-          context: context!,
-          builder: (context) => ScreenSelectDialog(),
-        );
-        stream = await navigator.mediaDevices.getDisplayMedia(<String, dynamic>{
-          'video': source == null
-              ? true
-              : {
-                  'deviceId': {'exact': source.id},
-                  'mandatory': {'frameRate': 30.0}
-                }
-        });
-      } else {
-        stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
-      }
+
     } else {
       stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
@@ -600,4 +587,23 @@ class Signaling {
     _senders.clear();
     _videoSource = VideoSource.Camera;
   }
+
+  // Turn Server
+
+  Future<Map> getTurnCredential(String host, int port) async {
+    HttpClient client = HttpClient(context: SecurityContext());
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) {
+      print('getTurnCredential: Allow self-signed certificate => $host:$port. ');
+      return true;
+    };
+    var url = 'https://$host:$port/api/turn?service=turn&username=flutter-webrtc';
+    var request = await client.getUrl(Uri.parse(url));
+    var response = await request.close();
+    var responseBody = await response.transform(Utf8Decoder()).join();
+    print('getTurnCredential:response => $responseBody.');
+    Map data = JsonDecoder().convert(responseBody);
+    return data;
+  }
+
 }

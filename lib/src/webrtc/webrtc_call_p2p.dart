@@ -2,9 +2,6 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../widgets/screen_select_dialog.dart';
 import 'signaling.dart';
 
 class CallP2P extends StatefulWidget {
@@ -17,7 +14,7 @@ class CallP2P extends StatefulWidget {
 }
 
 class _CallP2PState extends State<CallP2P> {
-  late SharedPreferences _prefs;
+
   Signaling? _signaling;
   List<dynamic> _peers = [];
   String? _selfId;
@@ -25,7 +22,6 @@ class _CallP2PState extends State<CallP2P> {
   RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   bool _inCalling = false;
   Session? _session;
-  DesktopCapturerSource? selected_source_;
   bool _waitAccept = false;
 
   // ignore: unused_element
@@ -34,15 +30,8 @@ class _CallP2PState extends State<CallP2P> {
   @override
   initState() {
     super.initState();
-    _initData();
     initRenderers();
     _connect(context);
-  }
-
-  _initData() async {
-    _prefs = await SharedPreferences.getInstance();
-    String _server = '202.52.240.148';
-    _prefs.setString('server', _server);
   }
 
   initRenderers() async {
@@ -102,7 +91,7 @@ class _CallP2PState extends State<CallP2P> {
           break;
         case CallState.CallStateInvite:
           _waitAccept = true;
-          _showInvateDialog();
+          _showInviteDialog();
           break;
         case CallState.CallStateConnected:
           if (_waitAccept) {
@@ -168,7 +157,7 @@ class _CallP2PState extends State<CallP2P> {
     );
   }
 
-  Future<bool?> _showInvateDialog() {
+  Future<bool?> _showInviteDialog() {
     return showDialog<bool?>(
       context: context,
       builder: (context) {
@@ -215,41 +204,6 @@ class _CallP2PState extends State<CallP2P> {
 
   _switchCamera() {
     _signaling?.switchCamera();
-  }
-
-  Future<void> selectScreenSourceDialog(BuildContext context) async {
-    MediaStream? screenStream;
-    if (WebRTC.platformIsDesktop) {
-      final source = await showDialog<DesktopCapturerSource>(
-        context: context,
-        builder: (context) => ScreenSelectDialog(),
-      );
-      if (source != null) {
-        try {
-          var stream =
-              await navigator.mediaDevices.getDisplayMedia(<String, dynamic>{
-            'video': {
-              'deviceId': {'exact': source.id},
-              'mandatory': {'frameRate': 30.0}
-            }
-          });
-          stream.getVideoTracks()[0].onEnded = () {
-            print(
-                'By adding a listener on onEnded you can: 1) catch stop video sharing on Web');
-          };
-          screenStream = stream;
-        } catch (e) {
-          print(e);
-        }
-      }
-    } else if (WebRTC.platformIsWeb) {
-      screenStream =
-          await navigator.mediaDevices.getDisplayMedia(<String, dynamic>{
-        'audio': false,
-        'video': true,
-      });
-    }
-    if (screenStream != null) _signaling?.switchToScreenSharing(screenStream);
   }
 
   _muteMic() {

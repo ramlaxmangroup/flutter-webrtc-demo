@@ -22,6 +22,7 @@ class SimpleWebSocket {
         onClose?.call(_socket.closeCode, _socket.closeReason);
       });
     } catch (e) {
+      // TODO Exception Occurs Here
       onClose?.call(500, e.toString());
     }
   }
@@ -53,8 +54,8 @@ class SimpleWebSocket {
           await client.getUrl(Uri.parse(url)); // form the correct url here
       request.headers.add('Connection', 'Upgrade');
       request.headers.add('Upgrade', 'websocket');
-      request.headers.add(
-          'Sec-WebSocket-Version', '13'); // insert the correct version here
+      // Specifies the WebSocket protocol version the client wishes to use, so the server can confirm whether or not that version is supported on its end.
+      request.headers.add('Sec-WebSocket-Version', '13'); // 13 // insert the correct version here // TODO Put Version Here
       request.headers.add('Sec-WebSocket-Key', key.toLowerCase());
 
       HttpClientResponse response = await request.close();
