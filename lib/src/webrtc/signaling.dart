@@ -35,18 +35,20 @@ class Session {
 }
 
 class Signaling {
-  Signaling(this._host, this._context);
 
-  JsonEncoder _encoder = JsonEncoder();
-  JsonDecoder _decoder = JsonDecoder();
-  String _selfId =  '123456';
+  Signaling(this._selfId, this._context);
+
+  String _host = '202.52.240.148';
+  int _port = 5064;
+  var _selfId = Random().nextInt(100).toString();
+
   SimpleWebSocket? _socket;
   BuildContext? _context;
-  var _host = '202.52.240.148'; // 'demo.cloudwebrtc.com
-  var _port = 5064; // 8086
   var _turnCredential;
   Map<String, Session> _sessions = {};
   MediaStream? _localStream;
+  JsonEncoder _encoder = JsonEncoder();
+  JsonDecoder _decoder = JsonDecoder();
   List<MediaStream> _remoteStreams = <MediaStream>[];
   List<RTCRtpSender> _senders = <RTCRtpSender>[];
   VideoSource _videoSource = VideoSource.Camera;
@@ -66,22 +68,8 @@ class Signaling {
   Map<String, dynamic> _iceServers = {
     'iceServers': [
       {'url': 'stun:stun.l.google.com:19302'},
-      /*
-       * turn server configuration example.
-      {
-        'url': 'turn:123.45.67.89:3478',
-        'username': 'change_to_real_user',
-        'credential': 'change_to_real_secret'
-      },
-      */
     ]
   };
-
-  String getRandomId<T>(List<String> list) {
-    final random = new Random();
-    var i = random.nextInt(list.length);
-    return list[i];
-  }
 
   final Map<String, dynamic> _config = {
     'mandatory': {},
@@ -116,18 +104,6 @@ class Signaling {
       } else {
         Helper.switchCamera(_localStream!.getVideoTracks()[0]);
       }
-    }
-  }
-
-  void switchToScreenSharing(MediaStream stream) {
-    if (_localStream != null && _videoSource != VideoSource.Screen) {
-      _senders.forEach((sender) {
-        if (sender.track!.kind == 'video') {
-          sender.replaceTrack(stream.getVideoTracks()[0]);
-        }
-      });
-      onLocalStream?.call(stream);
-      _videoSource = VideoSource.Screen;
     }
   }
 
@@ -291,13 +267,6 @@ class Signaling {
     if (_turnCredential == null) {
       try {
         _turnCredential = await getTurnCredential(_host, _port);
-        /*{
-            "username": "1584195784:mbzrxpgjys",
-            "password": "isyl6FF6nqMTB9/ig5MrMRUXqZg",
-            "ttl": 86400,
-            "uris": ["turn:127.0.0.1:19302?transport=udp"]
-          }
-        */
         _iceServers = {
           'iceServers': [
             {
@@ -398,51 +367,8 @@ class Signaling {
           });
           break;
       }
-
-      // Unified-Plan: Simuclast
-      /*
-      await pc.addTransceiver(
-        track: _localStream.getAudioTracks()[0],
-        init: RTCRtpTransceiverInit(
-            direction: TransceiverDirection.SendOnly, streams: [_localStream]),
-      );
-
-      await pc.addTransceiver(
-        track: _localStream.getVideoTracks()[0],
-        init: RTCRtpTransceiverInit(
-            direction: TransceiverDirection.SendOnly,
-            streams: [
-              _localStream
-            ],
-            sendEncodings: [
-              RTCRtpEncoding(rid: 'f', active: true),
-              RTCRtpEncoding(
-                rid: 'h',
-                active: true,
-                scaleResolutionDownBy: 2.0,
-                maxBitrate: 150000,
-              ),
-              RTCRtpEncoding(
-                rid: 'q',
-                active: true,
-                scaleResolutionDownBy: 4.0,
-                maxBitrate: 100000,
-              ),
-            ]),
-      );*/
-      /*
-        var sender = pc.getSenders().find(s => s.track.kind == "video");
-        var parameters = sender.getParameters();
-        if(!parameters)
-          parameters = {};
-        parameters.encodings = [
-          { rid: "h", active: true, maxBitrate: 900000 },
-          { rid: "m", active: true, maxBitrate: 300000, scaleResolutionDownBy: 2 },
-          { rid: "l", active: true, maxBitrate: 100000, scaleResolutionDownBy: 4 }
-        ];
-        sender.setParameters(parameters);
-      */
     }
+
     pc.onIceCandidate = (candidate) async {
       if (candidate == null) {
         print('onIceCandidate: complete!');
@@ -588,7 +514,9 @@ class Signaling {
     _videoSource = VideoSource.Camera;
   }
 
-  // Turn Server
+
+  // TODO =================|Turn Server |=================
+
 
   Future<Map> getTurnCredential(String host, int port) async {
     HttpClient client = HttpClient(context: SecurityContext());
