@@ -36,10 +36,11 @@ class Session {
 
 class Signaling {
 
-  Signaling(this._selfId, this._context);
+  Signaling(this._selfName, this._selfId, this._context);
 
   String _host = '202.52.240.148';
   int _port = 5064;
+  var _selfName = "Unknown";
   var _selfId = Random().nextInt(100).toString();
 
   SimpleWebSocket? _socket;
@@ -283,9 +284,9 @@ class Signaling {
       print('onOpen');
       onSignalingStateChange?.call(SignalingState.ConnectionOpen);
       _send('new', {
-        'name': "DeviceInfo.label",
+        'name': _selfName,
         'id': _selfId,
-        'user_agent': "DeviceInfo.userAgent"
+        'user_agent': " "
       });
     };
 

@@ -15,6 +15,7 @@ class VideoCallP2P extends StatefulWidget {
 
 class _VideoCallP2PState extends State<VideoCallP2P> {
 
+  String customSelfName = "Flutter Android"; // TODO Put your self name here
   String customSelfId = Random().nextInt(100).toString(); // TODO Put your self id here
   Signaling? _signaling;
   List<dynamic> _peers = [];
@@ -49,7 +50,7 @@ class _VideoCallP2PState extends State<VideoCallP2P> {
   }
 
   void _connect(BuildContext context) async {
-    _signaling ??= Signaling(customSelfId, context)..connect();
+    _signaling ??= Signaling(customSelfName, customSelfId, context)..connect();
     _signaling?.onSignalingStateChange = (SignalingState state) {
       switch (state) {
         case SignalingState.ConnectionClosed:
@@ -242,7 +243,7 @@ class _VideoCallP2PState extends State<VideoCallP2P> {
     var self = (peer['id'] == _selfId);
     return ListBody(children: <Widget>[
       ListTile(
-        title: Text(self ? peer['name'] + ', ID: ${peer['id']} ' + ' [Your self]' : peer['name'] + ', ID: ${peer['id']} '),
+        title: Text(self ? 'Name: ' + peer['name'] + ' - [Your self]' : 'Name: ' + peer['name']),
         onTap: null,
         trailing: SizedBox(
             width: 100.0,
@@ -256,7 +257,7 @@ class _VideoCallP2PState extends State<VideoCallP2P> {
                     tooltip: 'Video calling',
                   )
                 ])),
-        subtitle: Text('[' + peer['user_agent'] + ']'),
+        subtitle: Text('[ ID = ' + peer['id'] + ' ]'),
       ),
       Divider()
     ]);
